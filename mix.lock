@@ -1,0 +1,3 @@
+%{
+  "inflex": {:git, "https://github.com/nurugger07/inflex.git", "8d1da68d38ed7be49e0980ba6ee7156e92264090", []},
+}
