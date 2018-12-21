@@ -43,11 +43,49 @@ defmodule GameTest do
   end
 
   test "a guessed word is a won game" do
-    game = Game.new_game("wibble")
+    moves = [
+      {"w", :good_guess},
+      {"i", :good_guess},
+      {"b", :good_guess},
+      {"b", :already_used},
+      {"l", :good_guess},
+      {"e", :won},
+    ]
 
-    for letter <- game.letters do
-      { game, _tally } = Game.make_move(game, letter)
-      assert game.game_state == :good_guess
-    end
+    assert_final_game_state(moves, "wibble", :won, 7)
+  end
+
+  test "bad guess is recognized" do
+    game = Game.new_game("wibble")
+    { game, _tally } = Game.make_move(game, "x")
+
+    assert game.game_state == :bad_guess
+    assert game.turns_left == 6
+  end
+
+  test "lost game is recognized" do
+    moves = [
+      {"w", :bad_guess},
+      {"i", :bad_guess},
+      {"b", :bad_guess},
+      {"b", :already_used},
+      {"l", :bad_guess},
+      {"d", :bad_guess},
+      {"e", :lost},
+    ]
+
+    assert_final_game_state(moves, "hangman", :bad_guess, 1)
+  end
+
+  def assert_final_game_state(moves, guess_word, final_game_state, final_turns_left) do
+    game = Game.new_game(guess_word)
+    fun = fn ({ guess, _state }, game) ->
+            { game, _tally} = Game.make_move(game, guess)
+            game
+          end
+    final_game = Enum.reduce(moves, game, fun)
+
+    assert final_game.game_state == final_game_state
+    assert final_game.turns_left == final_turns_left
   end
 end
